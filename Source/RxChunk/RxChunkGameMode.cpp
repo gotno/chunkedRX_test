@@ -21,8 +21,6 @@ void ARxChunkGameMode::BeginPlay() {
     this
   );
 
-  // FString rxip = TEXT("127.0.0.1");
-  // FString rxip = TEXT("192.168.86.24");
   FString rxip = TEXT("0.0.0.0");
   int rxport = 7000;
   UE_LOG(LogTemp, Warning, TEXT("osc: server starting at %s:%d"), *rxip, rxport);
@@ -36,18 +34,11 @@ void ARxChunkGameMode::BeginPlay() {
   );
   oscrx->SetAllowlistClientsEnabled(false);
 
-  oscrx->OnOscMessageReceived.AddDynamic(this, &ARxChunkGameMode::TestMessage);
+  // oscrx->OnOscMessageReceived.AddDynamic(this, &ARxChunkGameMode::TestMessage);
+  // SendEcho();
 
   AddRoute(TEXT("/echo/*"), FName(TEXT("Echo")));
-}
-
-void ARxChunkGameMode::SendEcho() {
-  FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString("/echo"));
-  FOSCMessage message;
-  UOSCManager::SetOSCMessageAddress(message, address);
-  UOSCManager::AddString(message, TEXT("HI AM UNREAL EH?"));
-
-  osctx->SendOSCMessage(message);
+  AddRoute(TEXT("/blobtest/*"), FName(TEXT("BlobTest")));
 }
 
 void ARxChunkGameMode::AddRoute(const FString& AddressPattern, const FName& MethodName) {
@@ -87,4 +78,13 @@ void ARxChunkGameMode::BlobTest(
 
 void ARxChunkGameMode::TestMessage(const FOSCMessage& InMessage, const FString& InIPAddress, int32 InPort) {
   UE_LOG(LogTemp, Warning, TEXT("osc: test message path- %s"), *InMessage.GetAddress().GetFullPath());
+}
+
+void ARxChunkGameMode::SendEcho() {
+  FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString("/echo"));
+  FOSCMessage message;
+  UOSCManager::SetOSCMessageAddress(message, address);
+  UOSCManager::AddString(message, TEXT("HI AM UNREAL EH?"));
+
+  osctx->SendOSCMessage(message);
 }
