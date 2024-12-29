@@ -39,6 +39,7 @@ void ARxChunkGameMode::BeginPlay() {
 
   AddRoute(TEXT("/echo/*"), FName(TEXT("Echo")));
   AddRoute(TEXT("/blobtest/*"), FName(TEXT("BlobTest")));
+  AddRoute(TEXT("/chunked_test/*"), FName(TEXT("ChunkedTest")));
 }
 
 void ARxChunkGameMode::AddRoute(const FString& AddressPattern, const FName& MethodName) {
@@ -74,6 +75,24 @@ void ARxChunkGameMode::BlobTest(
 
   for (uint8 val : blob)
     UE_LOG(LogTemp, Warning, TEXT("osc: blob val- %d"), val);
+}
+
+void ARxChunkGameMode::ChunkedTest(
+  const FOSCAddress& AddressPattern,
+  const FOSCMessage &message,
+  const FString &ipaddress,
+  int32 port
+) {
+  int32_t id, chunkSize, chunkNum;
+  UOSCManager::GetInt32(message, 0, id);
+  UOSCManager::GetInt32(message, 1, chunkSize);
+  UOSCManager::GetInt32(message, 2, chunkNum);
+
+  TArray<uint8> blob;
+  UOSCManager::GetBlob(message, 3, blob);
+
+  for (uint8 val : blob)
+    UE_LOG(LogTemp, Warning, TEXT("osc: id- %d, chunkSize- %d, chunkNum- %d, blob val- %d"), id, chunkSize, chunkNum, val);
 }
 
 void ARxChunkGameMode::TestMessage(const FOSCMessage& InMessage, const FString& InIPAddress, int32 InPort) {

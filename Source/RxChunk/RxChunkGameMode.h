@@ -43,6 +43,13 @@ private:
     const FString &ipaddress,
     int32 port
   );
+  UFUNCTION()
+  void ChunkedTest(
+    const FOSCAddress& AddressPattern,
+    const FOSCMessage &message,
+    const FString &ipaddress,
+    int32 port
+  );
 
   UFUNCTION()
   void TestMessage(const FOSCMessage& InMessage, const FString& InIPAddress, int32 InPort);
