@@ -55,4 +55,5 @@ private:
   void TestMessage(const FOSCMessage& InMessage, const FString& InIPAddress, int32 InPort);
 
   void SendEcho();
+  void AckChunk(int32_t chunkedId, int32_t chunkNum);
 };

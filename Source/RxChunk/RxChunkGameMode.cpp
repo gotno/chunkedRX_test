@@ -88,11 +88,16 @@ void ARxChunkGameMode::ChunkedTest(
   UOSCManager::GetInt32(message, 1, chunkSize);
   UOSCManager::GetInt32(message, 2, chunkNum);
 
+  // fake a faulty send sometimes
+  // if (FMath::RandBool())
+    AckChunk(id, chunkNum);
+
   TArray<uint8> blob;
   UOSCManager::GetBlob(message, 3, blob);
 
-  for (uint8 val : blob)
-    UE_LOG(LogTemp, Warning, TEXT("osc: id- %d, chunkSize- %d, chunkNum- %d, blob val- %d"), id, chunkSize, chunkNum, val);
+  // for (uint8 val : blob)
+  //   UE_LOG(LogTemp, Warning, TEXT("osc: id- %d, chunkSize- %d, chunkNum- %d, blob val- %d"), id, chunkSize, chunkNum, val);
+
 }
 
 void ARxChunkGameMode::TestMessage(const FOSCMessage& InMessage, const FString& InIPAddress, int32 InPort) {
@@ -104,6 +109,18 @@ void ARxChunkGameMode::SendEcho() {
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
   UOSCManager::AddString(message, TEXT("HI AM UNREAL EH?"));
+
+  osctx->SendOSCMessage(message);
+}
+
+void ARxChunkGameMode::AckChunk(int32_t chunkedId, int32_t chunkNum) {
+  FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString("/ack_chunk"));
+  FOSCMessage message;
+  UOSCManager::SetOSCMessageAddress(message, address);
+  UOSCManager::AddInt32(message, chunkedId);
+  UOSCManager::AddInt32(message, chunkNum);
+
+  // UE_LOG(LogTemp, Warning, TEXT("osc: acking chunked %d chunknum %d"), chunkedId, chunkNum);
 
   osctx->SendOSCMessage(message);
 }
