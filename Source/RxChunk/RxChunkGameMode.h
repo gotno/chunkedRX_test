@@ -10,6 +10,7 @@
 
 class UOSCClient;
 class UOSCServer;
+class UChunked;
 
 UCLASS()
 class RXCHUNK_API ARxChunkGameMode : public AGameModeBase {
@@ -27,8 +28,17 @@ private:
   UPROPERTY()
   UOSCServer* oscrx;
 
-  void AddRoute(const FString& AddressPattern, const FName& MethodName);
+  UPROPERTY()
+  TMap<int32, UChunked*> ChunkedSends;
 
+  void AddRoute(const FString& AddressPattern, const FName& MethodName);
+  void AckChunk(
+    const FOSCMessage &message,
+    int32_t& chunkedId,
+    int32_t& chunkNum
+  );
+
+  // receives
   UFUNCTION()
   void Echo(
     const FOSCAddress& AddressPattern,
@@ -50,10 +60,14 @@ private:
     const FString &ipaddress,
     int32 port
   );
-
   UFUNCTION()
-  void TestMessage(const FOSCMessage& InMessage, const FString& InIPAddress, int32 InPort);
+  void TestMessage(
+    const FOSCMessage& InMessage,
+    const FString& InIPAddress,
+    int32 InPort
+  );
 
+  // sends
   void SendEcho();
-  void AckChunk(int32_t chunkedId, int32_t chunkNum);
+  void SendChunkAck(int32_t chunkedId, int32_t chunkNum);
 };

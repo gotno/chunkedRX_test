@@ -1,5 +1,7 @@
 #include "RxChunkGameMode.h"
 
+#include "Chunked.h"
+
 #include "OSCManager.h"
 #include "OSCClient.h"
 #include "OSCServer.h"
@@ -77,27 +79,49 @@ void ARxChunkGameMode::BlobTest(
     UE_LOG(LogTemp, Warning, TEXT("osc: blob val- %d"), val);
 }
 
+void ARxChunkGameMode::AckChunk(
+  const FOSCMessage &message,
+  int32_t& chunkedId,
+  int32_t& chunkNum
+) {
+  UOSCManager::GetInt32(message, 0, chunkedId);
+  UOSCManager::GetInt32(message, 1, chunkNum);
+
+  SendChunkAck(chunkedId, chunkNum);
+}
+
 void ARxChunkGameMode::ChunkedTest(
   const FOSCAddress& AddressPattern,
   const FOSCMessage &message,
   const FString &ipaddress,
   int32 port
 ) {
-  int32_t id, chunkSize, chunkNum;
-  UOSCManager::GetInt32(message, 0, id);
-  UOSCManager::GetInt32(message, 1, chunkSize);
-  UOSCManager::GetInt32(message, 2, chunkNum);
+  int32_t id, chunkNum;
+  AckChunk(message, id, chunkNum);
 
-  // fake a faulty send sometimes
-  // if (FMath::RandBool())
-    AckChunk(id, chunkNum);
+  int32_t numChunks, chunkSize;
+  UOSCManager::GetInt32(message, 2, numChunks);
+  UOSCManager::GetInt32(message, 3, chunkSize);
 
-  TArray<uint8> blob;
-  UOSCManager::GetBlob(message, 3, blob);
+  TArray<uint8_t> blob;
+  UOSCManager::GetBlob(message, 4, blob);
+
+  if (!ChunkedSends.Contains(id)) {
+    UChunked* chunked = NewObject<UChunked>(this);
+    chunked->Init(id, chunkSize * numChunks, numChunks);
+    chunked->OnComplete.AddLambda([](uint32_t id, TArray<uint8_t>& Data) {
+      UE_LOG(LogTemp, Warning, TEXT("osc: chunked %d complete, data:"), id);
+      for (uint8_t& byte : Data) {
+        UE_LOG(LogTemp, Warning, TEXT("osc:   %d"), byte);
+      }
+    });
+    ChunkedSends.Add(id, chunked);
+  }
+
+  ChunkedSends[id]->AddChunk(blob, chunkNum, chunkSize);
 
   // for (uint8 val : blob)
-  //   UE_LOG(LogTemp, Warning, TEXT("osc: id- %d, chunkSize- %d, chunkNum- %d, blob val- %d"), id, chunkSize, chunkNum, val);
-
+  //   UE_LOG(LogTemp, Warning, TEXT("osc: received chunk for %d- chunkSize- %d, chunkNum- %d, blob val- %d"), id, chunkSize, chunkNum, val);
 }
 
 void ARxChunkGameMode::TestMessage(const FOSCMessage& InMessage, const FString& InIPAddress, int32 InPort) {
@@ -113,7 +137,10 @@ void ARxChunkGameMode::SendEcho() {
   osctx->SendOSCMessage(message);
 }
 
-void ARxChunkGameMode::AckChunk(int32_t chunkedId, int32_t chunkNum) {
+void ARxChunkGameMode::SendChunkAck(int32_t chunkedId, int32_t chunkNum) {
+  // fake a faulty send sometimes
+  // if (FMath::RandBool()) return;
+
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString("/ack_chunk"));
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
