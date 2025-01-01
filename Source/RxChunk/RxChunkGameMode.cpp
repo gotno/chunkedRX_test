@@ -148,7 +148,10 @@ void ARxChunkGameMode::ChunkedTexture(
     chunked->Init(id, chunkSize * numChunks, numChunks);
     chunked->SetDimensions(width, height);
     chunked->OnComplete.AddLambda([&](uint32_t id, UTexture2D* texture) {
+      UE_LOG(LogTemp, Warning, TEXT("osc: texture added for chunked %d"), id);
       Textures.Add(id, texture);
+      ChunkedSends[id]->ConditionalBeginDestroy();
+      ChunkedSends[id] = nullptr;
     });
     ChunkedSends.Add(id, chunked);
   }
