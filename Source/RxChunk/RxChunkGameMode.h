@@ -11,6 +11,7 @@
 class UOSCClient;
 class UOSCServer;
 class UChunked;
+class UTexture2D;
 
 UCLASS()
 class RXCHUNK_API ARxChunkGameMode : public AGameModeBase {
@@ -30,6 +31,8 @@ private:
 
   UPROPERTY()
   TMap<int32, UChunked*> ChunkedSends;
+  UPROPERTY()
+  TMap<int32, UTexture2D*> Textures;
 
   void AddRoute(const FString& AddressPattern, const FName& MethodName);
   void AckChunk(
@@ -55,6 +58,13 @@ private:
   );
   UFUNCTION()
   void ChunkedTest(
+    const FOSCAddress& AddressPattern,
+    const FOSCMessage &message,
+    const FString &ipaddress,
+    int32 port
+  );
+  UFUNCTION()
+  void ChunkedTexture(
     const FOSCAddress& AddressPattern,
     const FOSCMessage &message,
     const FString &ipaddress,

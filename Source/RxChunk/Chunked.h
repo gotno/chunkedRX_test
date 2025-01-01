@@ -4,23 +4,26 @@
 #include "UObject/NoExportTypes.h"
 #include "Chunked.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnCompleteDelegate, uint32_t /* id */, TArray<uint8_t>& /* Data */);
 
 UCLASS()
 class RXCHUNK_API UChunked : public UObject {
 	GENERATED_BODY()
 	
 public:
+  virtual void Init(uint32_t inId, size_t TotalSize, int32_t inNumChunks);
+  void AddChunk(TArray<uint8_t>& Chunk, int32_t ChunkNum, size_t ChunkSize);
+
+protected:
   uint32_t id;
-  int32_t NumChunks;
   TArray<uint8_t> Data;
+
+private:
+  int32_t NumChunks;
   TSet<uint32_t> ReceivedChunks;
 
-  void Init(uint32_t inId, size_t TotalSize, int32_t inNumChunks);
-  void AddChunk(TArray<uint8_t>& Chunk, int32_t ChunkNum, size_t ChunkSize);
   bool HasChunk(int32_t ChunkNum);
   void MarkChunkReceived(int32_t ChunkNum);
   bool AllChunksReceived();
 
-  FOnCompleteDelegate OnComplete;
+  virtual void Finish();
 };

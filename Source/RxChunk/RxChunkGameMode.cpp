@@ -1,6 +1,7 @@
 #include "RxChunkGameMode.h"
 
-#include "Chunked.h"
+#include "ChunkedTest.h"
+#include "ChunkedTexture.h"
 
 #include "OSCManager.h"
 #include "OSCClient.h"
@@ -42,6 +43,7 @@ void ARxChunkGameMode::BeginPlay() {
   AddRoute(TEXT("/echo/*"), FName(TEXT("Echo")));
   AddRoute(TEXT("/blobtest/*"), FName(TEXT("BlobTest")));
   AddRoute(TEXT("/chunked_test/*"), FName(TEXT("ChunkedTest")));
+  AddRoute(TEXT("/chunked_texture/*"), FName(TEXT("ChunkedTexture")));
 }
 
 void ARxChunkGameMode::AddRoute(const FString& AddressPattern, const FName& MethodName) {
@@ -107,7 +109,7 @@ void ARxChunkGameMode::ChunkedTest(
   UOSCManager::GetBlob(message, 4, blob);
 
   if (!ChunkedSends.Contains(id)) {
-    UChunked* chunked = NewObject<UChunked>(this);
+    UChunkedTest* chunked = NewObject<UChunkedTest>(this);
     chunked->Init(id, chunkSize * numChunks, numChunks);
     chunked->OnComplete.AddLambda([](uint32_t id, TArray<uint8_t>& Data) {
       UE_LOG(LogTemp, Warning, TEXT("osc: chunked %d complete, data:"), id);
@@ -119,9 +121,39 @@ void ARxChunkGameMode::ChunkedTest(
   }
 
   ChunkedSends[id]->AddChunk(blob, chunkNum, chunkSize);
+}
 
-  // for (uint8 val : blob)
-  //   UE_LOG(LogTemp, Warning, TEXT("osc: received chunk for %d- chunkSize- %d, chunkNum- %d, blob val- %d"), id, chunkSize, chunkNum, val);
+void ARxChunkGameMode::ChunkedTexture(
+  const FOSCAddress& AddressPattern,
+  const FOSCMessage &message,
+  const FString &ipaddress,
+  int32 port
+) {
+  int32_t id, chunkNum;
+  AckChunk(message, id, chunkNum);
+
+  int32_t numChunks, chunkSize;
+  UOSCManager::GetInt32(message, 2, numChunks);
+  UOSCManager::GetInt32(message, 3, chunkSize);
+
+  TArray<uint8_t> blob;
+  UOSCManager::GetBlob(message, 4, blob);
+
+  int32_t width, height;
+  UOSCManager::GetInt32(message, 5, width);
+  UOSCManager::GetInt32(message, 6, height);
+
+  if (!ChunkedSends.Contains(id)) {
+    UChunkedTexture* chunked = NewObject<UChunkedTexture>(this);
+    chunked->Init(id, chunkSize * numChunks, numChunks);
+    chunked->SetDimensions(width, height);
+    chunked->OnComplete.AddLambda([&](uint32_t id, UTexture2D* texture) {
+      Textures.Add(id, texture);
+    });
+    ChunkedSends.Add(id, chunked);
+  }
+
+  ChunkedSends[id]->AddChunk(blob, chunkNum, chunkSize);
 }
 
 void ARxChunkGameMode::TestMessage(const FOSCMessage& InMessage, const FString& InIPAddress, int32 InPort) {
