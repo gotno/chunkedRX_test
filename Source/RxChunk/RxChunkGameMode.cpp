@@ -1,5 +1,6 @@
 #include "RxChunkGameMode.h"
 
+#include "Faced.h"
 #include "ChunkedTest.h"
 #include "ChunkedTexture.h"
 
@@ -44,6 +45,18 @@ void ARxChunkGameMode::BeginPlay() {
   AddRoute(TEXT("/blobtest/*"), FName(TEXT("BlobTest")));
   AddRoute(TEXT("/chunked_test/*"), FName(TEXT("ChunkedTest")));
   AddRoute(TEXT("/chunked_texture/*"), FName(TEXT("ChunkedTexture")));
+
+  FActorSpawnParameters spawnParams;
+  spawnParams.Owner = this;
+
+  DemoActor =
+    GetWorld()->SpawnActor<AFaced>(
+      AFaced::StaticClass(),
+      FVector(0.f),
+      FRotator(0.f, -90.f, 0.f),
+      spawnParams
+    );
+  DemoActor->SetSize(100.f, 100.f);
 }
 
 void ARxChunkGameMode::AddRoute(const FString& AddressPattern, const FName& MethodName) {
@@ -132,6 +145,11 @@ void ARxChunkGameMode::ChunkedTexture(
   int32_t id, chunkNum;
   AckChunk(message, id, chunkNum);
 
+  if (Textures.Contains(id)) {
+    DemoActor->SetTexture(Textures[id]);
+    return;
+  }
+
   int32_t numChunks, chunkSize;
   UOSCManager::GetInt32(message, 2, numChunks);
   UOSCManager::GetInt32(message, 3, chunkSize);
@@ -147,9 +165,11 @@ void ARxChunkGameMode::ChunkedTexture(
     UChunkedTexture* chunked = NewObject<UChunkedTexture>(this);
     chunked->Init(id, chunkSize * numChunks, numChunks);
     chunked->SetDimensions(width, height);
-    chunked->OnComplete.AddLambda([&](uint32_t id, UTexture2D* texture) {
+    chunked->OnComplete.AddLambda([&](uint32_t id, UTexture2D* Texture) {
       UE_LOG(LogTemp, Warning, TEXT("osc: texture added for chunked %d"), id);
-      Textures.Add(id, texture);
+      Textures.Add(id, Texture);
+      DemoActor->SetTexture(Texture);
+
       ChunkedSends[id]->ConditionalBeginDestroy();
       ChunkedSends[id] = nullptr;
     });

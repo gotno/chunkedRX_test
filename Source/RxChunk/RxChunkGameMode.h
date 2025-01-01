@@ -12,6 +12,7 @@ class UOSCClient;
 class UOSCServer;
 class UChunked;
 class UTexture2D;
+class AFaced;
 
 UCLASS()
 class RXCHUNK_API ARxChunkGameMode : public AGameModeBase {
@@ -24,6 +25,8 @@ protected:
   void BeginPlay() override;
 
 private:
+  AFaced* DemoActor;
+
   UPROPERTY()
   UOSCClient* osctx;
   UPROPERTY()
