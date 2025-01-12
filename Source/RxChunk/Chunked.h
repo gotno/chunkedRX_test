@@ -17,6 +17,8 @@ protected:
   uint32_t id;
   TArray<uint8_t> Data;
 
+  virtual void Finish();
+
 private:
   int32_t NumChunks;
   TSet<uint32_t> ReceivedChunks;
@@ -24,6 +26,4 @@ private:
   bool HasChunk(int32_t ChunkNum);
   void MarkChunkReceived(int32_t ChunkNum);
   bool AllChunksReceived();
-
-  virtual void Finish();
 };
