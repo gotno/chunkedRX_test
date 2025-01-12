@@ -14,6 +14,8 @@ ARxChunkGameMode::ARxChunkGameMode() {
 void ARxChunkGameMode::BeginPlay() {
   Super::BeginPlay();
 
+  GEngine->Exec(nullptr, TEXT("log LogOSC off"));
+
   UE_LOG(LogTemp, Warning, TEXT("osc: go"));
 
   FString txip = TEXT("127.0.0.1");
