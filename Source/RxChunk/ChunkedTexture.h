@@ -14,11 +14,13 @@ class RXCHUNK_API UChunkedTexture : public UChunked {
 	
 public:
   void SetDimensions(int32_t inWidth, int32_t inHeight);
+  void SetCompressed(bool inbCompressed);
 
   FOnChunkedTextureCompleteDelegate OnComplete;
 
 private:
   int32_t Width{0}, Height{0};
+  bool bCompressed{false};
 
   UTexture2D* MakeTexture();
   void Finish() override;

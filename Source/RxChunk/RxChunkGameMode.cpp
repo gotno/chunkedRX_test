@@ -163,10 +163,14 @@ void ARxChunkGameMode::ChunkedTexture(
   UOSCManager::GetInt32(message, 5, width);
   UOSCManager::GetInt32(message, 6, height);
 
+  bool bCompressed;
+  UOSCManager::GetBool(message, 7, bCompressed);
+
   if (!ChunkedSends.Contains(id)) {
     UChunkedTexture* chunked = NewObject<UChunkedTexture>(this);
     chunked->Init(id, chunkSize * numChunks, numChunks);
     chunked->SetDimensions(width, height);
+    chunked->SetCompressed(bCompressed);
     chunked->OnComplete.AddLambda([&](uint32_t id, UTexture2D* Texture) {
       UE_LOG(LogTemp, Warning, TEXT("osc: texture added for chunked %d"), id);
       Textures.Add(id, Texture);
