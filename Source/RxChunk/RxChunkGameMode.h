@@ -46,41 +46,41 @@ private:
 
   // receives
   UFUNCTION()
-  void Echo(
+  void rxEcho(
     const FOSCAddress& AddressPattern,
     const FOSCMessage &message,
     const FString &ipaddress,
     int32 port
   );
   UFUNCTION()
-  void BlobTest(
+  void rxBlobTest(
     const FOSCAddress& AddressPattern,
     const FOSCMessage &message,
     const FString &ipaddress,
     int32 port
   );
   UFUNCTION()
-  void ChunkedTest(
+  void rxChunkedTest(
     const FOSCAddress& AddressPattern,
     const FOSCMessage &message,
     const FString &ipaddress,
     int32 port
   );
   UFUNCTION()
-  void ChunkedTexture(
+  void rxChunkedTexture(
     const FOSCAddress& AddressPattern,
     const FOSCMessage &message,
     const FString &ipaddress,
     int32 port
   );
   UFUNCTION()
-  void TestMessage(
+  void TestMessageReceipt(
     const FOSCMessage& InMessage,
     const FString& InIPAddress,
     int32 InPort
   );
 
   // sends
-  void SendEcho();
-  void SendChunkAck(int32_t chunkedId, int32_t chunkNum);
+  void txEcho();
+  void txChunkAck(int32_t chunkedId, int32_t chunkNum);
 };

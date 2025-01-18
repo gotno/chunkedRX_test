@@ -40,13 +40,14 @@ void ARxChunkGameMode::BeginPlay() {
   );
   oscrx->SetAllowlistClientsEnabled(false);
 
-  // oscrx->OnOscMessageReceived.AddDynamic(this, &ARxChunkGameMode::TestMessage);
+  // oscrx->OnOscMessageReceived.AddDynamic(this, &ARxChunkGameMode::TestMessageReceipt);
   // SendEcho();
 
-  AddRoute(TEXT("/echo/*"), FName(TEXT("Echo")));
-  AddRoute(TEXT("/blobtest/*"), FName(TEXT("BlobTest")));
-  AddRoute(TEXT("/chunked_test/*"), FName(TEXT("ChunkedTest")));
-  AddRoute(TEXT("/chunked_texture/*"), FName(TEXT("ChunkedTexture")));
+  AddRoute(TEXT("/echo/*"), FName(TEXT("rxEcho")));
+  AddRoute(TEXT("/blobtest/*"), FName(TEXT("rxBlobTest")));
+  AddRoute(TEXT("/chunked_test/*"), FName(TEXT("rxChunkedTest")));
+  AddRoute(TEXT("/chunked_texture/*"), FName(TEXT("rxChunkedTexture")));
+  AddRoute(TEXT("/module_info/*"), FName(TEXT("rxModuleInfo")));
 
   FActorSpawnParameters spawnParams;
   spawnParams.Owner = this;
@@ -71,7 +72,7 @@ void ARxChunkGameMode::AddRoute(const FString& AddressPattern, const FName& Meth
   );
 }
 
-void ARxChunkGameMode::Echo(
+void ARxChunkGameMode::rxEcho(
   const FOSCAddress& AddressPattern,
   const FOSCMessage &message,
   const FString &ipaddress,
@@ -83,7 +84,7 @@ void ARxChunkGameMode::Echo(
   UE_LOG(LogTemp, Warning, TEXT("osc: echo- %s"), *say);
 }
 
-void ARxChunkGameMode::BlobTest(
+void ARxChunkGameMode::rxBlobTest(
   const FOSCAddress& AddressPattern,
   const FOSCMessage &message,
   const FString &ipaddress,
@@ -104,10 +105,10 @@ void ARxChunkGameMode::AckChunk(
   UOSCManager::GetInt32(message, 0, chunkedId);
   UOSCManager::GetInt32(message, 1, chunkNum);
 
-  SendChunkAck(chunkedId, chunkNum);
+  txChunkAck(chunkedId, chunkNum);
 }
 
-void ARxChunkGameMode::ChunkedTest(
+void ARxChunkGameMode::rxChunkedTest(
   const FOSCAddress& AddressPattern,
   const FOSCMessage &message,
   const FString &ipaddress,
@@ -138,7 +139,7 @@ void ARxChunkGameMode::ChunkedTest(
   ChunkedSends[id]->AddChunk(blob, chunkNum, chunkSize);
 }
 
-void ARxChunkGameMode::ChunkedTexture(
+void ARxChunkGameMode::rxChunkedTexture(
   const FOSCAddress& AddressPattern,
   const FOSCMessage &message,
   const FString &ipaddress,
@@ -185,11 +186,11 @@ void ARxChunkGameMode::ChunkedTexture(
   ChunkedSends[id]->AddChunk(blob, chunkNum, chunkSize);
 }
 
-void ARxChunkGameMode::TestMessage(const FOSCMessage& InMessage, const FString& InIPAddress, int32 InPort) {
+void ARxChunkGameMode::TestMessageReceipt(const FOSCMessage& InMessage, const FString& InIPAddress, int32 InPort) {
   UE_LOG(LogTemp, Warning, TEXT("osc: test message path- %s"), *InMessage.GetAddress().GetFullPath());
 }
 
-void ARxChunkGameMode::SendEcho() {
+void ARxChunkGameMode::txEcho() {
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString("/echo"));
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
@@ -198,7 +199,7 @@ void ARxChunkGameMode::SendEcho() {
   osctx->SendOSCMessage(message);
 }
 
-void ARxChunkGameMode::SendChunkAck(int32_t chunkedId, int32_t chunkNum) {
+void ARxChunkGameMode::txChunkAck(int32_t chunkedId, int32_t chunkNum) {
   // fake a faulty send sometimes
   // if (FMath::RandBool()) return;
 
