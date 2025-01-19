@@ -59,7 +59,7 @@ void ARxChunkGameMode::BeginPlay() {
       FRotator(0.f, -90.f, 0.f),
       spawnParams
     );
-  DemoActor->SetSize(100.f, 100.f);
+  DemoActor->SetSize(5.f, 5.f);
 }
 
 void ARxChunkGameMode::AddRoute(const FString& AddressPattern, const FName& MethodName) {
@@ -121,12 +121,12 @@ void ARxChunkGameMode::rxChunkedTest(
   UOSCManager::GetInt32(message, 2, numChunks);
   UOSCManager::GetInt32(message, 3, chunkSize);
 
-  TArray<uint8_t> blob;
+  TArray<uint8> blob;
   UOSCManager::GetBlob(message, 4, blob);
 
   if (!ChunkedSends.Contains(id)) {
     UChunkedTest* chunked = NewObject<UChunkedTest>(this);
-    chunked->Init(id, chunkSize * numChunks, numChunks);
+    chunked->Init(id, chunkSize * numChunks, numChunks, chunkSize);
     chunked->OnComplete.AddLambda([](uint32_t id, TArray<uint8_t>& Data) {
       UE_LOG(LogTemp, Warning, TEXT("osc: chunked %d complete, data:"), id);
       for (uint8_t& byte : Data) {
@@ -136,7 +136,7 @@ void ARxChunkGameMode::rxChunkedTest(
     ChunkedSends.Add(id, chunked);
   }
 
-  ChunkedSends[id]->AddChunk(blob, chunkNum, chunkSize);
+  ChunkedSends[id]->AddChunk(blob, chunkNum);
 }
 
 void ARxChunkGameMode::rxChunkedTexture(
@@ -157,25 +157,34 @@ void ARxChunkGameMode::rxChunkedTexture(
   UOSCManager::GetInt32(message, 2, numChunks);
   UOSCManager::GetInt32(message, 3, chunkSize);
 
+  int64_t totalSize;
+  UOSCManager::GetInt64(message, 4, totalSize);
+
   TArray<uint8_t> blob;
-  UOSCManager::GetBlob(message, 4, blob);
+  UOSCManager::GetBlob(message, 5, blob);
 
   int32_t width, height;
-  UOSCManager::GetInt32(message, 5, width);
-  UOSCManager::GetInt32(message, 6, height);
+  UOSCManager::GetInt32(message, 6, width);
+  UOSCManager::GetInt32(message, 7, height);
 
   bool bCompressed;
-  UOSCManager::GetBool(message, 7, bCompressed);
+  UOSCManager::GetBool(message, 8, bCompressed);
+
+  bool bOverlay;
+  UOSCManager::GetBool(message, 9, bOverlay);
 
   if (!ChunkedSends.Contains(id)) {
     UChunkedTexture* chunked = NewObject<UChunkedTexture>(this);
-    chunked->Init(id, chunkSize * numChunks, numChunks);
+    chunked->Init(id, totalSize, numChunks, chunkSize);
     chunked->SetDimensions(width, height);
     chunked->SetCompressed(bCompressed);
     chunked->OnComplete.AddLambda([&](uint32_t id, UTexture2D* Texture) {
-      UE_LOG(LogTemp, Warning, TEXT("osc: texture added for chunked %d"), id);
       Textures.Add(id, Texture);
-      DemoActor->SetTexture(Texture);
+      if (bOverlay) {
+        DemoActor->SetOverlay(Texture);
+      } else {
+        DemoActor->SetTexture(Texture);
+      }
 
       ChunkedSends[id]->ConditionalBeginDestroy();
       ChunkedSends[id] = nullptr;
@@ -183,7 +192,24 @@ void ARxChunkGameMode::rxChunkedTexture(
     ChunkedSends.Add(id, chunked);
   }
 
-  ChunkedSends[id]->AddChunk(blob, chunkNum, chunkSize);
+  ChunkedSends[id]->AddChunk(blob, chunkNum);
+}
+
+void ARxChunkGameMode::rxModuleInfo(
+  const FOSCAddress& AddressPattern,
+  const FOSCMessage &message,
+  const FString &ipaddress,
+  int32 port
+) {
+  int64_t moduleId;
+  UOSCManager::GetInt64(message, 0, moduleId);
+
+  float width, height;
+  UOSCManager::GetFloat(message, 1, width);
+  UOSCManager::GetFloat(message, 2, height);
+
+  UE_LOG(LogTemp, Warning, TEXT("%f/%f"), width, height);
+  DemoActor->SetSize(width, height);
 }
 
 void ARxChunkGameMode::TestMessageReceipt(const FOSCMessage& InMessage, const FString& InIPAddress, int32 InPort) {

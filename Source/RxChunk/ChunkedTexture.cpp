@@ -18,18 +18,14 @@ UTexture2D* UChunkedTexture::MakeTexture() {
   UTexture2D* TextureTarget =
     UTexture2D::CreateTransient(Width, Height, PF_R8G8B8A8);
 
-  uint8* MipData =
-    (uint8*)TextureTarget->
-      GetPlatformData()->
-      Mips[0].BulkData.Lock(LOCK_READ_WRITE);
+  void* MipData =
+    TextureTarget->GetPlatformData()->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
 
   if (bCompressed) {
     qoi_desc filedesc;
-    uint8* uncompressed =
-      (uint8*)qoi_decode(Data.GetData(), Data.Num(), &filedesc, 4);
-
-    FMemory::Memcpy(MipData, uncompressed, Width * Height * 4);
-    free(uncompressed);
+    void* decompressed = qoi_decode(Data.GetData(), Data.Num(), &filedesc, 4);
+    FMemory::Memcpy(MipData, decompressed, Width * Height * 4);
+    free(decompressed);
   } else {
     FMemory::Memcpy(MipData, Data.GetData(), Width * Height * 4);
   }

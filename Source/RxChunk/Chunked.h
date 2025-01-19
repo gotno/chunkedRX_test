@@ -10,8 +10,8 @@ class RXCHUNK_API UChunked : public UObject {
 	GENERATED_BODY()
 	
 public:
-  virtual void Init(uint32_t inId, size_t TotalSize, int32_t inNumChunks);
-  void AddChunk(TArray<uint8_t>& Chunk, int32_t ChunkNum, size_t ChunkSize);
+  virtual void Init(uint32_t inId, int64_t TotalSize, int32_t inNumChunks, int32_t inFullChunkSize);
+  void AddChunk(TArray<uint8_t>& Chunk, int32_t ChunkNum);
 
 protected:
   uint32_t id;
@@ -21,6 +21,7 @@ protected:
 
 private:
   int32_t NumChunks;
+  int32_t FullChunkSize;
   TSet<uint32_t> ReceivedChunks;
 
   bool HasChunk(int32_t ChunkNum);

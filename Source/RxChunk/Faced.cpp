@@ -60,3 +60,7 @@ void AFaced::SetSize(float Width, float Height) {
 void AFaced::SetTexture(UTexture2D* Texture) {
   FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Texture);
 }
+
+void AFaced::SetOverlay(UTexture2D* Texture) {
+  FaceMaterialInstance->SetTextureParameterValue(FName("overlay"), Texture);
+}

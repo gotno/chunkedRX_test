@@ -25,9 +25,10 @@ public:
 
   void SetSize(float Width, float Height);
   void SetTexture(UTexture2D* Texture);
+  void SetOverlay(UTexture2D* Texture);
 
 private:
-  float ScalingFactor{2.f};
+  float ScalingFactor{10.f};
 
   const wchar_t* MeshRef{TEXT(
     "/Script/Engine.StaticMesh'/Game/meshes/unit_cube.unit_cube'"
@@ -46,7 +47,7 @@ private:
   UMaterialInterface* BaseMaterialInterface;
 
   const wchar_t* FaceMaterialRef{TEXT(
-    "/Script/Engine.Material'/Game/materials/texture_face_bg.texture_face_bg'"
+    "/Script/Engine.Material'/Game/materials/texture_face_with_overlay.texture_face_with_overlay'"
   )};
   UPROPERTY()
   UMaterialInstanceDynamic* FaceMaterialInstance;

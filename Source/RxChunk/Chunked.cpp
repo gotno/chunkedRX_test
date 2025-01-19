@@ -2,16 +2,26 @@
 
 #include "HAL/UnrealMemory.h"
 
-void UChunked::Init(uint32_t inId, size_t TotalSize, int32_t inNumChunks) {
+void UChunked::Init(
+  uint32_t inId,
+  int64_t TotalSize,
+  int32_t inNumChunks,
+  int32_t inFullChunkSize
+) {
   id = inId;
-  Data.SetNumUninitialized(TotalSize);
+  Data.SetNum(TotalSize);
   NumChunks = inNumChunks;
+  FullChunkSize = inFullChunkSize;
 }
 
-void UChunked::AddChunk(TArray<uint8_t>& Chunk, int32_t ChunkNum, size_t ChunkSize) {
+void UChunked::AddChunk(TArray<uint8_t>& Chunk, int32_t ChunkNum) {
   if (HasChunk(ChunkNum)) return;
 
-  FMemory::Memcpy(Data.GetData() + ChunkNum * ChunkSize, Chunk.GetData(), ChunkSize);
+  FMemory::Memcpy(
+    Data.GetData() + ChunkNum * FullChunkSize,
+    Chunk.GetData(),
+    Chunk.Num()
+  );
 
   MarkChunkReceived(ChunkNum);
   if (AllChunksReceived()) Finish();

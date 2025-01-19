@@ -74,6 +74,13 @@ private:
     int32 port
   );
   UFUNCTION()
+  void rxModuleInfo(
+    const FOSCAddress& AddressPattern,
+    const FOSCMessage &message,
+    const FString &ipaddress,
+    int32 port
+  );
+  UFUNCTION()
   void TestMessageReceipt(
     const FOSCMessage& InMessage,
     const FString& InIPAddress,
