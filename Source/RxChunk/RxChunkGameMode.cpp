@@ -178,12 +178,12 @@ void ARxChunkGameMode::rxChunkedTexture(
     chunked->Init(id, totalSize, numChunks, chunkSize);
     chunked->SetDimensions(width, height);
     chunked->SetCompressed(bCompressed);
-    chunked->OnComplete.AddLambda([&](uint32_t id, UTexture2D* Texture) {
-      Textures.Add(id, Texture);
+    chunked->OnComplete.AddLambda([&](UChunkedTexture* ChunkedTexture) {
       if (bOverlay) {
-        DemoActor->SetOverlay(Texture);
+        DemoActor->SetOverlayData(ChunkedTexture);
       } else {
-        DemoActor->SetTexture(Texture);
+        Textures.Add(ChunkedTexture->id, ChunkedTexture->MakeTexture2D());
+        DemoActor->SetBaseTexture(Textures[ChunkedTexture->id]);
       }
 
       ChunkedSends[id]->ConditionalBeginDestroy();

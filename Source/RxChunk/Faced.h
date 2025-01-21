@@ -9,6 +9,8 @@ class UStaticMesh;
 class UMaterialInstanceDynamic;
 class UMaterialInterface;
 class UTexture2D;
+class UDynamicTextureComponent;
+class UChunkedTexture;
 
 UCLASS()
 class RXCHUNK_API AFaced : public AActor {
@@ -21,14 +23,17 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	virtual void Tick(float DeltaTime) override;
-
   void SetSize(float Width, float Height);
-  void SetTexture(UTexture2D* Texture);
-  void SetOverlay(UTexture2D* Texture);
+  void SetBaseTexture(UTexture2D* Texture);
+  void SetOverlayData(UChunkedTexture* ChunkedTexture);
 
 private:
   float ScalingFactor{10.f};
+
+  UPROPERTY()
+  UTexture2D* BaseTexture;
+  UPROPERTY()
+  UDynamicTextureComponent* OverlayTextureComponent;
 
   const wchar_t* MeshRef{TEXT(
     "/Script/Engine.StaticMesh'/Game/meshes/unit_cube.unit_cube'"

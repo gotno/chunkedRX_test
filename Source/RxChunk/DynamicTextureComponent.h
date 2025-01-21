@@ -4,7 +4,6 @@
 #include "Components/ActorComponent.h"
 #include "DynamicTextureComponent.generated.h"
 
-
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class RXCHUNK_API UDynamicTextureComponent : public UActorComponent {
 	GENERATED_BODY()
@@ -12,9 +11,18 @@ class RXCHUNK_API UDynamicTextureComponent : public UActorComponent {
 public:	
 	UDynamicTextureComponent();
 
-protected:
-	virtual void BeginPlay() override;
+  void Init(const uint32_t& inWidth, const uint32_t& inHeight);
+  bool IsInitialized();
+  void SetData(TArray<uint8_t>& inData);
+  UTexture2D* GetTexture();
 
-public:	
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+private:
+  UPROPERTY()
+  UTexture2D* Texture;
+
+  uint32_t Width{0}, Height{0}, BitsPerPixel{4};
+  TArray<uint8_t> Data;
+
+  bool bIsInitialized{false};
+  void UpdateTexture();
 };

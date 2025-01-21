@@ -10,13 +10,13 @@ class RXCHUNK_API UChunked : public UObject {
 	GENERATED_BODY()
 	
 public:
+  uint32_t id;
+  TArray<uint8_t> Data;
+
   virtual void Init(uint32_t inId, int64_t TotalSize, int32_t inNumChunks, int32_t inFullChunkSize);
   void AddChunk(TArray<uint8_t>& Chunk, int32_t ChunkNum);
 
 protected:
-  uint32_t id;
-  TArray<uint8_t> Data;
-
   virtual void Finish();
 
 private:

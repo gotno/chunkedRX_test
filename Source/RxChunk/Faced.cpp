@@ -1,12 +1,19 @@
 #include "Faced.h"
 
+#include "DynamicTextureComponent.h"
+#include "ChunkedTexture.h"
+
 #include "engine/Texture2D.h"
 
 AFaced::AFaced() {
 	PrimaryActorTick.bCanEverTick = false;
 
-  StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
+  StaticMeshComponent =
+    CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
   RootComponent = StaticMeshComponent;
+
+  OverlayTextureComponent =
+    CreateDefaultSubobject<UDynamicTextureComponent>(TEXT("Overlay Texture"));
 
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(MeshRef);
   if (MeshBody.Object) StaticMeshComponent->SetStaticMesh(MeshBody.Object);
@@ -44,11 +51,6 @@ void AFaced::BeginPlay() {
       FColor::Black
     );
   }
-
-}
-
-void AFaced::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
 }
 
 void AFaced::SetSize(float Width, float Height) {
@@ -57,10 +59,19 @@ void AFaced::SetSize(float Width, float Height) {
   );
 }
 
-void AFaced::SetTexture(UTexture2D* Texture) {
-  FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Texture);
+void AFaced::SetBaseTexture(UTexture2D* Texture) {
+  BaseTexture = Texture;
+  FaceMaterialInstance->SetTextureParameterValue(FName("texture"), BaseTexture);
 }
 
-void AFaced::SetOverlay(UTexture2D* Texture) {
-  FaceMaterialInstance->SetTextureParameterValue(FName("overlay"), Texture);
+void AFaced::SetOverlayData(UChunkedTexture* ChunkedTexture) {
+  if (!OverlayTextureComponent->IsInitialized()) {
+    OverlayTextureComponent->Init(ChunkedTexture->Width, ChunkedTexture->Height);
+    FaceMaterialInstance->SetTextureParameterValue(
+      FName("overlay"),
+      OverlayTextureComponent->GetTexture()
+    );
+  }
+
+  OverlayTextureComponent->SetData(ChunkedTexture->Data);
 }
