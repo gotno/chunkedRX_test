@@ -27,6 +27,4 @@ private:
   bool HasChunk(int32_t ChunkNum);
   void MarkChunkReceived(int32_t ChunkNum);
   bool AllChunksReceived();
-
-  mutable FCriticalSection DataGuard;
 };

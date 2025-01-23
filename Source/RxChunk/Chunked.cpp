@@ -15,7 +15,6 @@ void UChunked::Init(
 }
 
 void UChunked::AddChunk(TArray<uint8_t>& Chunk, int32_t ChunkNum) {
-  FScopeLock Lock(&DataGuard);
   if (HasChunk(ChunkNum)) return;
 
   FMemory::Memcpy(

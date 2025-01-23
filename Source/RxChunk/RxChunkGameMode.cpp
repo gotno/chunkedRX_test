@@ -178,6 +178,8 @@ void ARxChunkGameMode::rxChunkedTexture(
     chunked->Init(id, totalSize, numChunks, chunkSize);
     chunked->SetDimensions(width, height);
     chunked->SetCompressed(bCompressed);
+    ChunkedSends.Add(id, chunked);
+
     chunked->OnComplete.AddLambda([&](UChunkedTexture* ChunkedTexture) {
       if (bOverlay) {
         DemoActor->SetOverlayData(ChunkedTexture);
@@ -188,11 +190,13 @@ void ARxChunkGameMode::rxChunkedTexture(
 
       ChunkedSends[id]->ConditionalBeginDestroy();
       ChunkedSends[id] = nullptr;
+      ChunkedSends.Remove(id);
     });
-    ChunkedSends.Add(id, chunked);
   }
 
-  ChunkedSends[id]->AddChunk(blob, chunkNum);
+  if (ChunkedSends.Contains(id) && ChunkedSends[id]) {
+    ChunkedSends[id]->AddChunk(blob, chunkNum);
+  }
 }
 
 void ARxChunkGameMode::rxModuleInfo(
