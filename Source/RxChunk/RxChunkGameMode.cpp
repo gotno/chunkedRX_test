@@ -149,7 +149,7 @@ void ARxChunkGameMode::rxChunkedTexture(
   AckChunk(message, id, chunkNum);
 
   if (Textures.Contains(id)) {
-    DemoActor->SetTexture(Textures[id]);
+    DemoActor->SetBaseTexture(Textures[id]);
     return;
   }
 
