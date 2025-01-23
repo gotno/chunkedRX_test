@@ -188,11 +188,12 @@ void ARxChunkGameMode::rxChunkedTexture(
 
       ChunkedSends[id]->ConditionalBeginDestroy();
       ChunkedSends[id] = nullptr;
+      ChunkedSends.Remove(id);
     });
     ChunkedSends.Add(id, chunked);
+  } else if (ChunkedSends[id]) {
+    ChunkedSends[id]->AddChunk(blob, chunkNum);
   }
-
-  ChunkedSends[id]->AddChunk(blob, chunkNum);
 }
 
 void ARxChunkGameMode::rxModuleInfo(
