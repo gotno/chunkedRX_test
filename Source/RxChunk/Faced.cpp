@@ -4,9 +4,10 @@
 #include "ChunkedTexture.h"
 
 #include "engine/Texture2D.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AFaced::AFaced() {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
   StaticMeshComponent =
     CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
@@ -50,6 +51,27 @@ void AFaced::BeginPlay() {
       FName("background_color"),
       FColor::Black
     );
+  }
+
+  SetActorRotation(FRotator(0.f, StartYaw, 0.f));
+}
+
+void AFaced::Tick(float DeltaTime) {
+  RotateAlpha += DeltaTime / RotateDuration;
+
+  SetActorRotation(
+    FMath::InterpEaseOut<FRotator>(
+      FRotator(0.f, StartYaw, 0.f),
+      FRotator(0.f, TargetYaw, 0.f),
+      RotateAlpha,
+      4.f
+    )
+  );
+
+  if (RotateAlpha >= 1.f) {
+    RotateAlpha = 0.f;
+    StartYaw = TargetYaw;
+    TargetYaw = -TargetYaw;
   }
 }
 
