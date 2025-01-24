@@ -212,7 +212,6 @@ void ARxChunkGameMode::rxModuleInfo(
   UOSCManager::GetFloat(message, 1, width);
   UOSCManager::GetFloat(message, 2, height);
 
-  UE_LOG(LogTemp, Warning, TEXT("%f/%f"), width, height);
   DemoActor->SetSize(width, height);
 }
 
