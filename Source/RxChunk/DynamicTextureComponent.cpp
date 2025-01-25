@@ -41,7 +41,7 @@ void UDynamicTextureComponent::SetData(TArray<uint8_t>& inData) {
 void UDynamicTextureComponent::UpdateTexture() {
   ENQUEUE_RENDER_COMMAND()(
     [this](FRHICommandListImmediate& RHICmdList) {
-      if (!Texture) return;
+      if (!this || !Texture) return;
 
       FUpdateTextureRegion2D region(0, 0, 0, 0, Width, Height);
 

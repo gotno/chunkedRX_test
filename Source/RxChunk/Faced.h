@@ -23,12 +23,13 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
+  virtual void Tick(float DeltaTime) override;
   void SetSize(float Width, float Height);
   void SetBaseTexture(UTexture2D* Texture);
   void SetOverlayData(UChunkedTexture* ChunkedTexture);
 
 private:
-  float ScalingFactor{10.f};
+  float ScalingFactor{14.f};
 
   UPROPERTY()
   UTexture2D* BaseTexture;
@@ -58,4 +59,9 @@ private:
   UMaterialInstanceDynamic* FaceMaterialInstance;
   UPROPERTY()
   UMaterialInterface* FaceMaterialInterface;
+
+  float TargetYaw{30.f};
+  float StartYaw = -TargetYaw;
+  float RotateAlpha{0.f};
+  float RotateDuration{2.f}; // seconds
 };

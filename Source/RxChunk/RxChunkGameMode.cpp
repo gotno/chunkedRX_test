@@ -178,6 +178,8 @@ void ARxChunkGameMode::rxChunkedTexture(
     chunked->Init(id, totalSize, numChunks, chunkSize);
     chunked->SetDimensions(width, height);
     chunked->SetCompressed(bCompressed);
+    ChunkedSends.Add(id, chunked);
+
     chunked->OnComplete.AddLambda([&](UChunkedTexture* ChunkedTexture) {
       if (bOverlay) {
         DemoActor->SetOverlayData(ChunkedTexture);
@@ -190,8 +192,9 @@ void ARxChunkGameMode::rxChunkedTexture(
       ChunkedSends[id] = nullptr;
       ChunkedSends.Remove(id);
     });
-    ChunkedSends.Add(id, chunked);
-  } else if (ChunkedSends[id]) {
+  }
+
+  if (ChunkedSends.Contains(id) && ChunkedSends[id]) {
     ChunkedSends[id]->AddChunk(blob, chunkNum);
   }
 }
@@ -209,7 +212,6 @@ void ARxChunkGameMode::rxModuleInfo(
   UOSCManager::GetFloat(message, 1, width);
   UOSCManager::GetFloat(message, 2, height);
 
-  UE_LOG(LogTemp, Warning, TEXT("%f/%f"), width, height);
   DemoActor->SetSize(width, height);
 }
 
