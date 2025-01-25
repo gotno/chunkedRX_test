@@ -38,8 +38,7 @@ void UChunkedTexture::Decompress() {
 
   int32_t size = filedesc.width * filedesc.height * filedesc.channels;
 
-  Data.Empty();
-  Data.SetNum(size);
+  Data.SetNumUninitialized(size);
   FMemory::Memcpy(Data.GetData(), decompressed, size);
 
   bCompressed = false;
